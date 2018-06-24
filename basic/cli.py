@@ -11,6 +11,12 @@ flags.DEFINE_string("model_name", "basic", "Model name [basic]")
 flags.DEFINE_string("data_dir", "data/squad", "Data dir [data/squad]")
 flags.DEFINE_string("run_id", "0", "Run ID [0]")
 flags.DEFINE_string("out_base_dir", "out", "out base dir [out]")
+flags.DEFINE_string("out_dir", "", "out base dir [out]")
+flags.DEFINE_string("save_dir", "", "out base dir [out]")
+flags.DEFINE_string("log_dir", "", "out base dir [out]")
+flags.DEFINE_string("eval_dir", "", "out base dir [out]")
+flags.DEFINE_string("answer_dir", "", "out base dir [out]")
+
 flags.DEFINE_string("forward_name", "single", "Forward name [single]")
 flags.DEFINE_string("answer_path", "", "Answer path []")
 flags.DEFINE_string("eval_path", "", "Eval path []")
@@ -52,6 +58,14 @@ flags.DEFINE_integer("highway_num_layers", 2, "highway num layers [2]")
 flags.DEFINE_bool("share_cnn_weights", True, "Share Char-CNN weights [True]")
 flags.DEFINE_bool("share_lstm_weights", True, "Share pre-processing (phrase-level) LSTM weights [True]")
 flags.DEFINE_float("var_decay", 0.999, "Exponential moving average decay for variables [0.999]")
+flags.DEFINE_integer("max_num_sents", 0, "max_num_sents")
+flags.DEFINE_integer("max_sent_size", 0, "max_sent_size")
+flags.DEFINE_integer("max_ques_size", 0, "max_ques_size")
+flags.DEFINE_integer("max_word_size", 0, "max_word_size")
+flags.DEFINE_integer("max_para_size", 0, "max_para_size")
+flags.DEFINE_integer("char_vocab_size", 0, "char_vocab_size")
+flags.DEFINE_integer("word_emb_size", 0, "word_emb_size")
+flags.DEFINE_integer("word_vocab_size", 0, "word_vocab_size")
 
 # Optimizations
 flags.DEFINE_bool("cluster", False, "Cluster data for faster training [False]")
@@ -104,6 +118,7 @@ def main(_):
     config.out_dir = os.path.join(config.out_base_dir, config.model_name, str(config.run_id).zfill(2))
 
     m(config)
+
 
 if __name__ == "__main__":
     tf.app.run()

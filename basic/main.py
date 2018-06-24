@@ -75,11 +75,11 @@ def _train(config):
     emb_mat = np.array([idx2vec_dict[idx] if idx in idx2vec_dict
                         else np.random.multivariate_normal(np.zeros(config.word_emb_size), np.eye(config.word_emb_size))
                         for idx in range(config.word_vocab_size)])
-    config.emb_mat = emb_mat
+    # config.emb_mat = emb_mat
 
     # construct model graph and variables (using default graph)
     pprint(config.__flags, indent=2)
-    models = get_multi_gpu_models(config)
+    models = get_multi_gpu_models(config, emb_mat=emb_mat)
     model = models[0]
     trainer = MultiGPUTrainer(config, models)
     evaluator = MultiGPUF1Evaluator(config, models, tensor_dict=model.tensor_dict if config.vis else None)
@@ -138,10 +138,10 @@ def _test(config):
         new_word2idx_dict = test_data.shared['new_word2idx']
         idx2vec_dict = {idx: word2vec_dict[word] for word, idx in new_word2idx_dict.items()}
         new_emb_mat = np.array([idx2vec_dict[idx] for idx in range(len(idx2vec_dict))], dtype='float32')
-        config.new_emb_mat = new_emb_mat
+        # config.new_emb_mat = new_emb_mat
 
     pprint(config.__flags, indent=2)
-    models = get_multi_gpu_models(config)
+    models = get_multi_gpu_models(config, emb_mat=new_emb_mat)
     model = models[0]
     evaluator = MultiGPUF1Evaluator(config, models, tensor_dict=models[0].tensor_dict if config.vis else None)
     graph_handler = GraphHandler(config, model)
@@ -184,10 +184,10 @@ def _forward(config):
         new_word2idx_dict = test_data.shared['new_word2idx']
         idx2vec_dict = {idx: word2vec_dict[word] for word, idx in new_word2idx_dict.items()}
         new_emb_mat = np.array([idx2vec_dict[idx] for idx in range(len(idx2vec_dict))], dtype='float32')
-        config.new_emb_mat = new_emb_mat
+        # config.new_emb_mat = new_emb_mat
 
     pprint(config.__flags, indent=2)
-    models = get_multi_gpu_models(config)
+    models = get_multi_gpu_models(config, emb_mat=new_emb_mat)
     model = models[0]
     evaluator = ForwardEvaluator(config, model)
     graph_handler = GraphHandler(config, model)  # controls all tensors and variables in the graph, including loading /saving

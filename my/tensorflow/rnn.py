@@ -1,9 +1,13 @@
 import tensorflow as tf
 from tensorflow.python.ops.rnn import dynamic_rnn as _dynamic_rnn, \
     bidirectional_dynamic_rnn as _bidirectional_dynamic_rnn
-from tensorflow.python.ops.rnn import bidirectional_rnn as _bidirectional_rnn
 
 from my.tensorflow import flatten, reconstruct
+
+try:
+    from tensorflow.python.ops.rnn import bidirectional_rnn as _bidirectional_rnn
+except Exception:
+    from tensorflow.python.ops.rnn import static_bidirectional_rnn as _bidirectional_rnn
 
 
 def dynamic_rnn(cell, inputs, sequence_length=None, initial_state=None,
@@ -67,7 +71,6 @@ def bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, sequence_length=None,
 def bidirectional_rnn(cell_fw, cell_bw, inputs,
                       initial_state_fw=None, initial_state_bw=None,
                       dtype=None, sequence_length=None, scope=None):
-
     flat_inputs = flatten(inputs, 2)  # [-1, J, d]
     flat_len = None if sequence_length is None else tf.cast(flatten(sequence_length, 0), 'int64')
 
