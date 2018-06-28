@@ -39,7 +39,7 @@ class MultiGPUTrainer(object):
         assert isinstance(model, Model)
         self.config = config
         self.model = model
-        self.opt = tf.train.AdadeltaOptimizer(config.init_lr)
+        self.opt = tf.train.GradientDescentOptimizer(config.init_lr)
         self.var_list = model.get_var_list()
         self.global_step = model.get_global_step()
         self.summary = model.summary
