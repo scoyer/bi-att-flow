@@ -1,15 +1,13 @@
 import gzip
 import json
-from json import encoder
 import os
+import pickle
 
 import tensorflow as tf
 
-from basic.evaluator import Evaluation, F1Evaluation
+from basic.evaluator import Evaluation
 from my.tensorflow.general import get_num_params
 from my.utils import short_floats
-
-import pickle
 
 
 class GraphHandler(object):
@@ -68,17 +66,19 @@ class GraphHandler(object):
     def dump_eval(self, e, precision=2, path=None):
         assert isinstance(e, Evaluation)
         if self.config.dump_pickle:
-            path = path or os.path.join(self.config.eval_dir, "{}-{}.pklz".format(e.data_type, str(e.global_step).zfill(6)))
+            path = path or os.path.join(self.config.eval_dir,
+                                        "{}-{}.pklz".format(e.data_type, str(e.global_step).zfill(6)))
             with gzip.open(path, 'wb', compresslevel=3) as fh:
                 pickle.dump(e.dict, fh)
         else:
-            path = path or os.path.join(self.config.eval_dir, "{}-{}.json".format(e.data_type, str(e.global_step).zfill(6)))
+            path = path or os.path.join(self.config.eval_dir,
+                                        "{}-{}.json".format(e.data_type, str(e.global_step).zfill(6)))
             with open(path, 'w') as fh:
                 json.dump(short_floats(e.dict, precision), fh)
 
     def dump_answer(self, e, path=None):
         assert isinstance(e, Evaluation)
-        path = path or os.path.join(self.config.answer_dir, "{}-{}.json".format(e.data_type, str(e.global_step).zfill(6)))
+        path = path or os.path.join(self.config.answer_dir,
+                                    "{}-{}.json".format(e.data_type, str(e.global_step).zfill(6)))
         with open(path, 'w') as fh:
             json.dump(e.id2answer_dict, fh)
-

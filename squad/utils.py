@@ -1,5 +1,7 @@
 import re
 
+import numpy as np
+
 
 def get_2d_spans(text, tokenss):
     spanss = []
@@ -99,14 +101,45 @@ def get_best_span(ypi, yp2i):
     return ((best_sent_idx, best_word_span[0]), (best_sent_idx, best_word_span[1] + 1)), float(max_val)
 
 
+def get_best_span_wy(wypi, th):
+    chunk_spans = []
+    scores = []
+    chunk_start = None
+    score = 0
+    l = 0
+    th = min(th, np.max(wypi))
+    for f, wypif in enumerate(wypi):
+        for j, wypifj in enumerate(wypif):
+            if wypifj >= th:
+                if chunk_start is None:
+                    chunk_start = f, j
+                score += wypifj
+                l += 1
+            else:
+                if chunk_start is not None:
+                    chunk_stop = f, j
+                    chunk_spans.append((chunk_start, chunk_stop))
+                    scores.append(score / l)
+                    score = 0
+                    l = 0
+                    chunk_start = None
+        if chunk_start is not None:
+            chunk_stop = f, j + 1
+            chunk_spans.append((chunk_start, chunk_stop))
+            scores.append(score / l)
+            score = 0
+            l = 0
+            chunk_start = None
+
+    return max(zip(chunk_spans, scores), key=lambda pair: pair[1])
+
+
 def get_span_score_pairs(ypi, yp2i):
     span_score_pairs = []
     for f, (ypif, yp2if) in enumerate(zip(ypi, yp2i)):
         for j in range(len(ypif)):
             for k in range(j, len(yp2if)):
-                span = ((f, j), (f, k+1))
+                span = ((f, j), (f, k + 1))
                 score = ypif[j] * yp2if[k]
                 span_score_pairs.append((span, score))
     return span_score_pairs
-
-
