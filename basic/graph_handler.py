@@ -6,6 +6,7 @@ import os
 import tensorflow as tf
 
 from basic.evaluator import Evaluation, F1Evaluation
+from my.tensorflow.general import get_num_params
 from my.utils import short_floats
 
 import pickle
@@ -22,16 +23,8 @@ class GraphHandler(object):
     def initialize(self, sess):
         sess.run(tf.global_variables_initializer())
 
-        total_parameters = 0
-        for variable in tf.trainable_variables():
-            # shape is an array of tf.Dimension
-            print(variable)
-            shape = variable.get_shape()
-            variable_parameters = 1
-            for dim in shape:
-                variable_parameters *= dim.value
-            total_parameters += variable_parameters
-        print(total_parameters)
+        total_parameters = get_num_params()
+        print("Total parameter number is [{}].".format(total_parameters))
 
         if self.config.load:
             self._load(sess)
@@ -45,7 +38,7 @@ class GraphHandler(object):
 
     def _load(self, sess):
         config = self.config
-        vars_ = {var.name.split(":")[0]: var for var in tf.all_variables()}
+        vars_ = {var.name.split(":")[0]: var for var in tf.global_variables()}
         if config.load_ema:
             ema = self.model.var_ema
             for var in tf.trainable_variables():

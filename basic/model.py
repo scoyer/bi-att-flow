@@ -14,12 +14,14 @@ from my.tensorflow.rnn_cell import SwitchableDropoutWrapper, AttentionCell
 
 def get_multi_gpu_models(config, emb_mat):
     models = []
-    for gpu_idx in range(config.num_gpus):
-        with tf.name_scope("model_{}".format(gpu_idx)) as scope, tf.device(
-                "/{}:{}".format(config.device_type, gpu_idx)):
-            model = Model(config, emb_mat, scope, rep=gpu_idx == 0)
-            tf.get_variable_scope().reuse_variables()
-            models.append(model)
+    with tf.variable_scope(tf.get_variable_scope()) as scope:
+        # add a scope to fix an error listed in [https://github.com/tensorflow/tensorflow/issues/6220]
+        for gpu_idx in range(config.num_gpus):
+            with tf.name_scope("model_{}".format(gpu_idx)) as scope, tf.device(
+                    "/{}:{}".format(config.device_type, gpu_idx)):
+                model = Model(config, emb_mat, scope, rep=gpu_idx == 0)
+                tf.get_variable_scope().reuse_variables()
+                models.append(model)
     return models
 
 
@@ -242,11 +244,11 @@ class Model(object):
         M = tf.shape(self.x)[1]
         JQ = tf.shape(self.q)[1]
         loss_mask = tf.reduce_max(tf.cast(self.q_mask, 'float'), 1)
-        losses = tf.nn.softmax_cross_entropy_with_logits(
+        losses = tf.nn.softmax_cross_entropy_with_logits_v2(
             logits=self.logits, labels=tf.cast(tf.reshape(self.y, [-1, M * JX]), 'float'))
         ce_loss = tf.reduce_mean(loss_mask * losses)
         tf.add_to_collection('losses', ce_loss)
-        ce_loss2 = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
+        ce_loss2 = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(
             logits=self.logits2, labels=tf.cast(tf.reshape(self.y2, [-1, M * JX]), 'float')))
         tf.add_to_collection("losses", ce_loss2)
 
@@ -445,7 +447,7 @@ def bi_attention(config, is_train, h, u, h_mask=None, u_mask=None, scope=None, t
             a_h = tf.nn.softmax(tf.reduce_max(u_logits, 3))
             tensor_dict['a_u'] = a_u
             tensor_dict['a_h'] = a_h
-            variables = tf.get_collection(tf.GraphKeys.VARIABLES, scope=tf.get_variable_scope().name)
+            variables = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=tf.get_variable_scope().name)
             for var in variables:
                 tensor_dict[var.name] = var
 
