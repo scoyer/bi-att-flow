@@ -6,7 +6,6 @@ import pickle
 import tensorflow as tf
 
 from basic.evaluator import Evaluation
-from my.tensorflow.general import get_num_params
 from my.utils import short_floats
 
 
@@ -20,9 +19,6 @@ class GraphHandler(object):
 
     def initialize(self, sess):
         sess.run(tf.global_variables_initializer())
-
-        total_parameters = get_num_params()
-        print("Total parameter number is [{}].".format(total_parameters))
 
         if self.config.load:
             self._load(sess)
