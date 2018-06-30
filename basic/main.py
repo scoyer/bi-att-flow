@@ -79,7 +79,7 @@ def _train(config):
     # config.emb_mat = emb_mat
 
     # construct model graph and variables (using default graph)
-    pprint(config.__flags, indent=2)
+    pprint(config.flag_values_dict(), indent=2)
     models = get_multi_gpu_models(config, emb_mat=emb_mat)
     model = models[0]
     print("num params: {}".format(get_num_params()))
